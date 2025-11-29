@@ -1,0 +1,46 @@
+@startuml
+actor Client
+participant System
+participant "Платежный шлюз" as Gateway
+participant "Администратор площадки" as Admin
+participant "Подрядчики" as Contractors
+participant Manager
+
+Client -> System: Запрос доступности площадки
+System -> System: Проверка дат
+alt Площадка доступна
+    System -> Client: Стоимость и условия
+else Недоступна
+    System -> Client: Предложить другой вариант
+    return
+end
+
+Client -> System: Подтверждение бронирования
+System -> Gateway: Запрос на предоплату
+Gateway --> System: Статус оплаты
+
+alt Оплата успешна
+    System -> Client: Бронирование подтверждено
+    System -> Admin: Уведомление о мероприятии
+else Оплата отклонена
+    System -> Client: Уведомление – повторить оплату
+    return
+end
+
+Admin -> System: Создание задач
+System -> Contractors: Отправка задач
+
+par Параллельное выполнение
+    Contractors -> System: Подтверждение выполнения
+    Contractors -> System: Статус задач
+end
+
+System -> Admin: Отчёт о готовности
+
+Client -> System: Завершение мероприятия
+System -> Client: Запрос оценки
+
+Client --> System: Отзыв
+System -> Manager: Отчёт с отзывами
+
+@enduml
